@@ -10,7 +10,7 @@ web:
   hostname: myappserver
 db:
   hostname: mysqlserver
-  image: akshay2005/sems-mysql
+  image: mysql
   environment:
      MYSQL_ROOT_PASSWORD: my-secret-pw
      MYSQL_DATABASE: expensesdb
