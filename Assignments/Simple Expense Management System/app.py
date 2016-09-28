@@ -2,8 +2,12 @@ import datetime
 from flask import Flask, redirect, url_for, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
+import sqlalchemy
+engine = sqlalchemy.create_engine('mysql://root:my-secret-pw@172.17.0.2') # connect to server
+engine.execute("CREATE DATABASE IF NOT EXISTS expensesdb") #create db
+
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:alpine@localhost/expensesdb'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:my-secret-pw@172.17.0.2/expensesdb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = 'True'
 
 
@@ -89,4 +93,4 @@ def expenses_del(expense_id):
 
 if __name__ == '__main__':
   db.create_all()
-  app.run(debug = True)
+  app.run(debug = True, host='0.0.0.0')
