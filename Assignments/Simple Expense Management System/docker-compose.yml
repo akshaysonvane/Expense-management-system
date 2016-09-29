@@ -1,16 +1,16 @@
-web:
-  build: .
-  command: python /code/app.py
-  ports:
-   - "5000:5000"
-  volumes:
-   - .:/code
-  links:
-   - db
-  hostname: myappserver
 db:
   hostname: mysqlserver
   image: mysql
   environment:
      MYSQL_ROOT_PASSWORD: my-secret-pw
      MYSQL_DATABASE: expensesdb
+web:
+  build: .
+  command: python /code/app.py
+  ports:
+   - "5000:5000"
+  volumes:
+   - ./database:/var/lib/mysql
+  links:
+   - db
+  hostname: myappserver
