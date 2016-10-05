@@ -1,10 +1,18 @@
-import datetime
+import datetime, time
 from flask import Flask, redirect, url_for, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 import sqlalchemy
-engine = sqlalchemy.create_engine('mysql://root:my-secret-pw@172.17.0.2') # connect to server
-engine.execute("CREATE DATABASE IF NOT EXISTS expensesdb") #create db
+
+def setConnection():
+  try:
+    engine = sqlalchemy.create_engine('mysql://root:my-secret-pw@172.17.0.2') # connect to server
+    engine.execute("CREATE DATABASE IF NOT EXISTS expensesdb") #create db
+  except:
+    time.sleep(5)
+    setConnection()
+
+setConnection()
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:my-secret-pw@172.17.0.2/expensesdb'

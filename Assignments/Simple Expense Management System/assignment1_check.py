@@ -40,7 +40,7 @@ email_id = args.email_id
 object_to_post = {
     "name": "Foo Bar",
     "email": "foo@bar.com",
-    "category": "office supplies|travel|training",
+    "category": "travel",
     "description": "iPad for office use",
     "link": "http://www.apple.com/shop/buy-ipad/ipad-pro",
     "estimated_costs": "700",
