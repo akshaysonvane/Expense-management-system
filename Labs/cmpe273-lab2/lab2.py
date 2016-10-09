@@ -3,21 +3,22 @@ import json
 #import logging
 #logging.basicConfig(level=logging.DEBUG)
 from datetime import *
-from spyne import Application, srpc, ServiceBase, Unicode, String
+from collections import OrderedDict
+from operator import itemgetter
+from spyne import Application, srpc, ServiceBase, Unicode
 from spyne.protocol.http import HttpRpc
 from spyne.protocol.json import JsonDocument
 from spyne.server.wsgi import WsgiApplication
-from collections import OrderedDict
-from operator import itemgetter
+
 
 class SpotCrime(ServiceBase):
-  @srpc(Unicode, Unicode, Unicode, _returns=String)
+  @srpc(Unicode, Unicode, Unicode, _returns=Unicode)
   def checkcrime(lat, lon, radius):
     get_url = "https://api.spotcrime.com/crimes.json?lat=%s&lon=%s&radius=%s&key=." % (lat, lon, radius)
     get_response = requests.get(get_url)
     json_response = json.loads(get_response.content)
 
-    street_array = []
+    response = {}
     crime_type = {}
     street_name = {}	
     event_time = {
@@ -109,11 +110,11 @@ class SpotCrime(ServiceBase):
     # sort dictionary
     street_name = OrderedDict(sorted(street_name.items(), key=itemgetter(1), reverse = True))
 
-    response = {}
     response['total_crime'] = len(json_response['crimes'])
     response['the_most_dangerous_streets'] = list(street_name)[:3]
-    response['event_time_count'] = event_time
     response['crime_type_count'] = crime_type
+    response['event_time_count'] = event_time
+
     yield response
 
 application = Application([SpotCrime],
