@@ -1,13 +1,14 @@
 import requests
 import json
+#import logging
+#logging.basicConfig(level=logging.DEBUG)
 from datetime import *
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
 from spyne import Application, srpc, ServiceBase, Unicode, String
 from spyne.protocol.http import HttpRpc
 from spyne.protocol.json import JsonDocument
 from spyne.server.wsgi import WsgiApplication
+from collections import OrderedDict
+from operator import itemgetter
 
 class SpotCrime(ServiceBase):
   @srpc(Unicode, Unicode, Unicode, _returns=String)
@@ -16,7 +17,9 @@ class SpotCrime(ServiceBase):
     get_response = requests.get(get_url)
     json_response = json.loads(get_response.content)
 
+    street_array = []
     crime_type = {}
+    street_name = {}	
     event_time = {
         "12:01am-3am" : 0,
         "3:01am-6am" : 0,
@@ -26,8 +29,54 @@ class SpotCrime(ServiceBase):
         "3:01pm-6pm" : 0,
         "6:01pm-9pm" : 0,
         "9:01pm-12midnight" : 0
-    } 
+    }
+
     for i in json_response['crimes']:
+      #most_dangerous_streets
+      # case : &
+      if "&" in i['address']:
+	string = i['address'].split(" & ")
+	if(not street_name.has_key(string[0])):
+	  street_name[string[0]] = 1
+	else:
+	  street_name[string[0]] = street_name[string[0]] + 1
+
+        if(not street_name.has_key(string[1])):
+	  street_name[string[1]] = 1
+	else:
+	  street_name[string[1]] = street_name[string[1]] + 1
+      # case : BLOCK OF
+      elif "BLOCK OF" in i['address']:
+	string = i['address'].split(" BLOCK OF ")
+
+	if(not street_name.has_key(string[1])):
+	  street_name[string[1]] = 1
+	else:
+	  street_name[string[1]] = street_name[string[1]] + 1
+      # case : BLOCK BLOCK
+      elif "BLOCK BLOCK" in i['address']:
+	string = i['address'].split(" BLOCK BLOCK ")
+
+	if(not street_name.has_key(string[1])):
+	  street_name[string[1]] = 1
+	else:
+	  street_name[string[1]] = street_name[string[1]] + 1
+      else: 
+	# case : BLOCK
+	if i['address'].count('BLOCK') is 1:
+	  string = i['address'].split(" BLOCK ")
+
+	  if(not street_name.has_key(string[1])):
+	    street_name[string[1]] = 1
+	  else:
+	    street_name[string[1]] = street_name[string[1]] + 1
+	else:
+	# case : direct street name
+	  if(not street_name.has_key(i['address'])):
+	    street_name[i['address']] = 1
+	  else:
+	    street_name[i['address']] = street_name[i['address']] + 1
+
       #crime_type_count
       if(not crime_type.has_key(i['type'])):
         crime_type[i['type']] = 1
@@ -57,9 +106,12 @@ class SpotCrime(ServiceBase):
       else:
         event_time['9:01pm-12midnight'] = event_time['9:01pm-12midnight'] + 1
 
+    # sort dictionary
+    street_name = OrderedDict(sorted(street_name.items(), key=itemgetter(1), reverse = True))
+
     response = {}
     response['total_crime'] = len(json_response['crimes'])
-    response['the_most_dangerous_streets'] = []
+    response['the_most_dangerous_streets'] = list(street_name)[:3]
     response['event_time_count'] = event_time
     response['crime_type_count'] = crime_type
     yield response
