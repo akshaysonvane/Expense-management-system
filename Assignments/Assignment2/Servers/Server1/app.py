@@ -1,13 +1,14 @@
 import datetime, time
 from flask import Flask, redirect, url_for, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from redis import Redis
 
 import sqlalchemy
 
 
 def setConnection():
     try:
-        engine = sqlalchemy.create_engine('mysql://root:my-secret-pw@172.17.0.2')  # connect to server
+        engine = sqlalchemy.create_engine('mysql://root:my-secret-pw@172.18.0.2')  # connect to server
         engine.execute("CREATE DATABASE IF NOT EXISTS expensesdb")  # create db
     except:
         time.sleep(5)
@@ -17,10 +18,11 @@ def setConnection():
 setConnection()
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:my-secret-pw@172.17.0.2/expensesdb'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:my-secret-pw@172.18.0.2/expensesdb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = 'True'
 
 db = SQLAlchemy(app)
+redis = Redis(host='172.18.0.3', port=6379)
 
 
 class expenses(db.Model):
@@ -108,4 +110,5 @@ def expenses_del(expense_id):
 
 if __name__ == '__main__':
     db.create_all()
-    app.run(debug=True, host='0.0.0.0')
+    redis.set('1', '172.18.0.4:3000')
+    app.run(debug=True, host='0.0.0.0', port=3000)
