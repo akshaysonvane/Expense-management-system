@@ -13,3 +13,6 @@ cd ../Server3
 
 cd ../../ConsistentHashingClient
 ./initcproxy.sh
+
+cd ../
+python ch_client.py
