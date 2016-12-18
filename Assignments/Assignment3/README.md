@@ -3,15 +3,18 @@
 ->Run 'initall.sh' script.
 
 *Three Flask expense management instances are:
+```
 -http://172.18.0.5:3000
 -http://172.18.0.6:3000
 -http://172.18.0.7:3000
+```
 
 *Three MySql db instances are:
+```
 -http://172.18.0.2:3306
 -http://172.18.0.3:3306
 -http://172.18.0.4:3306
-
+```
 
 *POST:
 ```
